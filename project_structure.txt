@@ -1,0 +1,22 @@
+resume-retrieval/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── parse/          # API route to handle PDF uploads and raw text extraction
+│   │   │   │   └── route.ts
+│   │   │   ├── search/         # API route for similarity search queries
+│   │   │   │   └── route.ts
+│   │   ├── layout.tsx          # Root layout (fonts, global providers)
+│   │   ├── page.tsx            # Main dashboard UI (search bar, upload button)
+│   ├── components/
+│   │   ├── ResumeCard.tsx      # UI component for displaying search results
+│   │   ├── SearchBar.tsx       # UI component for query input
+│   │   ├── UploadModal.tsx     # UI component for drag-and-drop PDF upload
+│   ├── lib/
+│   │   ├── supabaseClient.ts   # Initialized Supabase client
+│   │   ├── transformers.ts     # Local ML pipeline (all-MiniLM-L6-v2) singleton
+│   │   ├── pdfParser.ts        # Helper functions for pdf-parse or pdfjs-dist
+├── .env.local                  # Supabase URL and Anon Key
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
