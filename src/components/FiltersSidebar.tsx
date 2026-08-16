@@ -35,7 +35,7 @@ export function FiltersSidebar() {
   };
 
   return (
-    <aside className="flex flex-col gap-6 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur h-fit sticky top-6">
+    <aside className="flex flex-col gap-6 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur h-fit sticky top-6 animate-sidebar-enter">
       <div>
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Filters</h3>
         <p className="text-xs text-[var(--text-secondary)] mt-1">Refine your candidate search</p>

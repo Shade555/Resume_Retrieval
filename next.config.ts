@@ -2,10 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdfjs-dist", "onnxruntime-node", "sharp"],
-  outputFileTracingIncludes: {
-    "api/**/*": ["./models/**/*"],
-  },
+  serverExternalPackages: ["pdfjs-dist"],
 };
 
 export default withSentryConfig(nextConfig, {

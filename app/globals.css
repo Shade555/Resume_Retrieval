@@ -112,6 +112,22 @@ body::before {
     radial-gradient(40% 40% at 14% 10%, rgba(167, 139, 250, 0.2), transparent 70%),
     radial-gradient(36% 36% at 86% 18%, rgba(125, 211, 252, 0.2), transparent 70%),
     radial-gradient(42% 42% at 50% 86%, rgba(244, 114, 182, 0.12), transparent 70%);
+  animation: bg-breathe 15s ease-in-out infinite alternate;
+}
+
+@keyframes bg-breathe {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05) translate(2%, 3%);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.02) translate(-2%, -1%);
+    opacity: 0.9;
+  }
 }
 
 /* 
@@ -191,6 +207,93 @@ body::before {
   }
   to {
     clip-path: circle(150% at 80% 10%);
+  }
+}
+
+/* 
+ * 5. AWWWARDS-LEVEL CARD ANIMATIONS 
+ */
+
+/* Staggered Entrance Cascade */
+.animate-card-enter {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  animation: cardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dynamic glow & hover lift */
+.card-awwwards {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s ease;
+  position: relative;
+}
+
+.card-awwwards::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom, rgba(167, 139, 250, 0.3), transparent 40%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.card-awwwards:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 25px 50px -12px rgba(167, 139, 250, 0.15), 0 0 40px rgba(125, 211, 252, 0.05);
+}
+
+.card-awwwards:hover::before {
+  opacity: 1;
+}
+
+/* Tag scale on hover */
+.card-awwwards:hover .tag-awwwards {
+  transform: scale(1.05);
+  background-color: rgba(167, 139, 250, 0.25);
+  border-color: rgba(167, 139, 250, 0.6);
+}
+
+.tag-awwwards {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 
+ * 6. UI COMPONENT ANIMATIONS 
+ */
+
+/* Search bar focus sweep */
+.search-bar-awwwards {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-bar-awwwards:focus-within {
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5), 0 0 30px rgba(167, 139, 250, 0.15);
+  transform: scale(1.01);
+}
+
+/* Sidebar Slide In */
+.animate-sidebar-enter {
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: sidebarEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sidebarEnter {
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

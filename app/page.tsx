@@ -145,8 +145,8 @@ export default function Home() {
               </section>
             ) : results.length > 0 ? (
               <section className="grid gap-4 md:grid-cols-2">
-                {results.map((resume) => (
-                  <ResumeCard key={resume.id} resume={resume} query={query} />
+                {results.map((resume, index) => (
+                  <ResumeCard key={resume.id} resume={resume} query={query} index={index} />
                 ))}
               </section>
             ) : query ? (

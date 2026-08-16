@@ -16,6 +16,7 @@ type ResumeResult = {
 type ResumeCardProps = {
   resume: ResumeResult;
   query?: string;
+  index?: number;
 };
 
 // Simple text highlighter that splits on query words
@@ -67,7 +68,7 @@ function getSnippet(text: string, query?: string): string {
   return text.substring(0, 240) + (text.length > 240 ? "..." : "");
 }
 
-export function ResumeCard({ resume, query }: ResumeCardProps) {
+export function ResumeCard({ resume, query, index = 0 }: ResumeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const scorePercent = Math.round(resume.similarity * 100);
   const snippet = getSnippet(resume.raw_text || "", query);
@@ -85,9 +86,10 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
       <article 
         className={clsx(
           "rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-sm",
-          "flex flex-col h-full relative transition-colors",
+          "flex flex-col h-full transition-colors card-awwwards animate-card-enter",
           isSelected && "border-[#7dd3fc]/50 bg-[#7dd3fc]/10"
         )}
+        style={{ animationDelay: `${index * 100}ms` }}
       >
         <div className="absolute top-5 right-5 flex items-center gap-2">
           <button
@@ -141,7 +143,7 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
           {(resume.skills || []).slice(0, 8).map((skill) => (
             <span
               key={`${resume.id}-${skill}`}
-              className="rounded-full border border-[#a78bfa]/40 bg-[#a78bfa]/15 px-3 py-1 text-xs text-[#d6cbff]"
+              className="rounded-full border border-[#a78bfa]/40 bg-[#a78bfa]/15 px-3 py-1 text-xs text-[#d6cbff] tag-awwwards"
             >
               {skill}
             </span>

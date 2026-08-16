@@ -1,9 +1,7 @@
 import { env, pipeline } from "@huggingface/transformers";
 import path from "path";
 
-// Tell transformers.js to look for models in our local bundled directory
-env.localModelPath = path.join(process.cwd(), "models");
-env.allowRemoteModels = false; // Never download on the fly (prevents Vercel 10s timeout)
+env.allowRemoteModels = true;
 env.allowLocalModels = true;
 
 const embeddingModel = "Xenova/all-MiniLM-L6-v2";
