@@ -4,6 +4,8 @@ import { extractTextFromPdfBuffer, MAX_PDF_SIZE_BYTES } from "@/src/lib/pdfParse
 import { extractResumeMetadata } from "@/src/lib/resumeMetadata";
 import { generateEmbedding } from "@/src/lib/transformers";
 import { supabase } from "@/src/lib/supabaseClient";
+import { uploadRateLimiter, getClientIp } from "@/src/lib/rateLimit";
+import { logger } from "@/src/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -14,7 +16,27 @@ type ParseRequestBody = {
 };
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
   try {
+    const ip = getClientIp(request);
+    
+    // Rate Limiting
+    const { success, limit: rateLimit, remaining, reset } = await uploadRateLimiter.limit(ip);
+    if (!success) {
+      logger.warn({ ip }, "Rate limit exceeded for upload API");
+      return NextResponse.json(
+        { error: "Too many uploads. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          }
+        }
+      );
+    }
+
     const contentType = request.headers.get("content-type") || "";
     let rawText = "";
 
@@ -84,6 +106,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const duration = Date.now() - startTime;
+    logger.info({ resumeId: data.id, durationMs: duration }, "Resume parsed and stored successfully");
+
     return NextResponse.json(
       {
         message: "Resume text stored successfully.",
@@ -93,15 +118,18 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.stack || error.message : "Unknown error.";
+    const duration = Date.now() - startTime;
     
     // Distinguish between unprocessable entities (e.g. image-based PDFs) and internal server errors
     if (message.includes("Could not extract any text") || message.includes("no readable text was found") || message.includes("No usable text found")) {
+      logger.warn({ error: message, durationMs: duration }, "Unprocessable resume PDF");
       return NextResponse.json(
         { error: message },
         { status: 422 }, // Unprocessable Entity
       );
     }
 
+    logger.error({ error: message, durationMs: duration }, "Parse API failed");
     return NextResponse.json(
       { error: `Failed to process resume text: ${message}` },
       { status: 500 },

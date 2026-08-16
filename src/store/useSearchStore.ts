@@ -175,12 +175,12 @@ export const useSearchStore = create<SearchState>((set, get) => ({
         throw new Error(data.error || "Search request failed.");
       }
 
-      set({ 
-        results: data.results || [], 
+      set((state) => ({ 
+        results: activePage === 1 ? (data.results || []) : [...state.results, ...(data.results || [])], 
         hasNextPage: data.hasNextPage || false,
         page: activePage,
         limit: activeLimit
-      });
+      }));
     } catch (searchError) {
       toast.error(searchError instanceof Error ? searchError.message : "Unknown search error.");
       set({ results: [], hasNextPage: false });

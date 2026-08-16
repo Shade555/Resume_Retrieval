@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { generateEmbedding } from "@/src/lib/transformers";
 import { supabase } from "@/src/lib/supabaseClient";
+import { searchRateLimiter, getClientIp } from "@/src/lib/rateLimit";
+import { redis } from "@/src/lib/redis";
+import { logger } from "@/src/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -23,7 +26,27 @@ type SearchResultRow = {
 };
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
   try {
+    const ip = getClientIp(request);
+    
+    // 1. Rate Limiting
+    const { success, limit: rateLimit, remaining, reset } = await searchRateLimiter.limit(ip);
+    if (!success) {
+      logger.warn({ ip }, "Rate limit exceeded for search API");
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          }
+        }
+      );
+    }
+
     const body = (await request.json()) as SearchRequestBody;
     const query = body.query?.trim() || "";
     const threshold = typeof body.threshold === "number" ? body.threshold : 0.0;
@@ -59,7 +82,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const queryEmbedding = await generateEmbedding(query);
+    // 2. Embedding Caching
+    const cacheKey = `embed:${query.toLowerCase()}`;
+    let queryEmbedding = await redis.get<number[]>(cacheKey);
+
+    if (queryEmbedding) {
+      logger.info({ query }, "Embedding cache hit");
+    } else {
+      logger.info({ query }, "Embedding cache miss, generating...");
+      queryEmbedding = Array.from(await generateEmbedding(query));
+      // Cache for 24 hours (86400 seconds)
+      await redis.set(cacheKey, queryEmbedding, { ex: 86400 });
+    }
+
     // Request more matches to allow for filtering and pagination
     const matchCount = page * limit + 50;
 
@@ -106,6 +141,9 @@ export async function POST(request: Request) {
       similarity: row.similarity,
     }));
 
+    const duration = Date.now() - startTime;
+    logger.info({ query, durationMs: duration, resultsCount: pagedResults.length }, "Search completed successfully");
+
     return NextResponse.json(
       {
         query,
@@ -119,6 +157,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error.";
+    logger.error({ error: message, durationMs: Date.now() - startTime }, "Search API failed");
 
     return NextResponse.json(
       { error: `Failed to run semantic search: ${message}` },

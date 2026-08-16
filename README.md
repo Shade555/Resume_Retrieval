@@ -32,6 +32,18 @@ Optional for privileged server-side operations:
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
+For Rate Limiting & Caching (Phase 6):
+
+```env
+UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+```
+
+For Error Tracking (Phase 6):
+```env
+SENTRY_DSN=your_sentry_dsn
+```
+
 ## Install Dependencies
 
 ```bash

@@ -8,6 +8,7 @@ import { FiltersSidebar } from "@/src/components/FiltersSidebar";
 import { ExportBar } from "@/src/components/ExportBar";
 import { UploadModal } from "@/src/components/UploadModal";
 import { useSearchStore } from "@/src/store/useSearchStore";
+import { useInView } from "react-intersection-observer";
 
 export default function Home() {
   const theme = useSearchStore((state) => state.theme);
@@ -22,9 +23,19 @@ export default function Home() {
   const hasNextPage = useSearchStore((state) => state.hasNextPage);
   const runSearch = useSearchStore((state) => state.runSearch);
 
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+  });
+
   useEffect(() => {
     initializeTheme();
   }, [initializeTheme]);
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isSearching) {
+      void runSearch(undefined, page + 1);
+    }
+  }, [inView, hasNextPage, isSearching, page, runSearch]);
 
   const summary = useMemo(() => {
     if (results.length === 0) {
@@ -111,44 +122,14 @@ export default function Home() {
               </div>
             ) : null}
 
-            {results.length > 0 && !isSearching && (
-              <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[var(--text-secondary)]">Results per page:</span>
-                  <select
-                    value={limit}
-                    onChange={(e) => {
-                      const newLimit = parseInt(e.target.value, 10);
-                      void runSearch(undefined, 1, newLimit);
-                    }}
-                    className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--dark-purple)]"
-                  >
-                    <option value={12}>12</option>
-                    <option value={24}>24</option>
-                    <option value={48}>48</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => void runSearch(undefined, Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-[var(--text-secondary)]">
-                    Page {page}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => void runSearch(undefined, page + 1)}
-                    disabled={!hasNextPage}
-                    className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
-                  >
-                    Next
-                  </button>
-                </div>
+            {results.length > 0 && hasNextPage && (
+              <div ref={ref} className="mt-8 flex items-center justify-center pt-6">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-[#a78bfa]"></div>
+              </div>
+            )}
+            {results.length > 0 && !hasNextPage && !isSearching && (
+              <div className="mt-8 flex items-center justify-center pt-6 text-sm text-[var(--text-secondary)]">
+                No more candidates to load.
               </div>
             )}
           </div>
