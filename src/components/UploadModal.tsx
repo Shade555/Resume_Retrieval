@@ -1,6 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
+
+const bytesToMb = (value: number) => (value / (1024 * 1024)).toFixed(1);
+
+const isPdfFile = (file: File) =>
+  file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+function getValidationError(file: File | null): string | null {
+  if (!file) {
+    return "Select a PDF file first.";
+  }
+
+  if (!isPdfFile(file)) {
+    return "Only PDF files are supported.";
+  }
+
+  if (file.size > MAX_PDF_SIZE_BYTES) {
+    return `File is too large (${bytesToMb(file.size)}MB). Max allowed is 10MB.`;
+  }
+
+  return null;
+}
 
 type UploadModalProps = {
   isOpen: boolean;
@@ -9,19 +32,26 @@ type UploadModalProps = {
 };
 
 export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
-  const [rawText, setRawText] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleUpload = async () => {
-    const payload = rawText.trim();
+  const onSelectFile = (file: File | null) => {
+    setSelectedFile(file);
+    setError(getValidationError(file));
+  };
 
-    if (!payload) {
-      setError("Paste resume text before uploading.");
+  const handleUpload = async () => {
+    const validationError = getValidationError(selectedFile);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -29,12 +59,12 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
       setIsSubmitting(true);
       setError(null);
 
+      const formData = new FormData();
+      formData.append("resume", selectedFile);
+
       const response = await fetch("/api/parse", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ raw_text: payload }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -42,7 +72,7 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
         throw new Error(data.error || "Failed to upload resume text.");
       }
 
-      setRawText("");
+      setSelectedFile(null);
       onUploaded();
       onClose();
     } catch (uploadError) {
@@ -56,7 +86,7 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#121219] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-100">Add Resume Text</h2>
+          <h2 className="text-lg font-semibold text-zinc-100">Upload Resume PDF</h2>
           <button
             type="button"
             onClick={onClose}
@@ -66,12 +96,58 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
           </button>
         </div>
 
-        <textarea
-          value={rawText}
-          onChange={(event) => setRawText(event.target.value)}
-          rows={12}
-          placeholder="Paste the parsed resume text here..."
-          className="w-full rounded-xl border border-white/15 bg-[#1a1a24] px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-[#7dd3fc]"
+        <div
+          role="button"
+          tabIndex={0}
+          onDragEnter={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault();
+            setIsDragging(false);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setIsDragging(false);
+            const [file] = Array.from(event.dataTransfer.files);
+            onSelectFile(file || null);
+          }}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          className={`flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed px-6 text-center transition ${
+            isDragging
+              ? "border-[#7dd3fc] bg-[#7dd3fc]/10"
+              : "border-white/20 bg-[#1a1a24] hover:border-white/35"
+          }`}
+        >
+          <p className="text-sm font-medium text-zinc-100">Drag and drop your PDF here</p>
+          <p className="mt-2 text-xs text-zinc-400">or click to browse files (max 10MB)</p>
+          {selectedFile ? (
+            <p className="mt-4 rounded-lg border border-[#a78bfa]/35 bg-[#a78bfa]/10 px-3 py-2 text-xs text-[#d9ceff]">
+              Selected: {selectedFile.name} ({bytesToMb(selectedFile.size)}MB)
+            </p>
+          ) : null}
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          className="hidden"
+          onChange={(event) => {
+            const [file] = Array.from(event.target.files || []);
+            onSelectFile(file || null);
+          }}
         />
 
         {error ? <p className="mt-3 text-sm text-[#fca5a5]">{error}</p> : null}

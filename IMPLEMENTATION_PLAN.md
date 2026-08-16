@@ -392,29 +392,29 @@ Before starting development, review:
 **Design Reference**: Apply colors from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) to all components
 
 #### Task 1: Build PDF Parser ✅ → `src/lib/pdfParser.ts`
-- [ ] Install `pdfjs-dist` (`npm install pdfjs-dist`)
-- [ ] Extract text from uploaded PDFs
-- [ ] Clean and normalize text
+- [x] Install `pdfjs-dist` (`npm install pdfjs-dist`)
+- [x] Extract text from uploaded PDFs
+- [x] Clean and normalize text
 - [ ] Commit: `feat(lib): add pdfParser for PDF text extraction`
 
 **Tracking**: 
 ```
-Status: Not started
-Est. Completion: 
+Status: Complete
+Est. Completion: Aug 16, 2026
 Commit: (pending)
 ```
 
 #### Task 2: Extend Parse API ✅ → Update `src/app/api/parse/route.ts`
-- [ ] Accept FormData with file upload
-- [ ] Add file validation (MIME, size, 10MB limit)
-- [ ] Integrate PDF parser
-- [ ] Extract and store metadata (name, email, skills)
+- [x] Accept FormData with file upload
+- [x] Add file validation (MIME, size, 10MB limit)
+- [x] Integrate PDF parser
+- [x] Extract and store metadata (name, email, skills)
 - [ ] Commit: `feat(api): extend parse endpoint to handle PDF uploads`
 
 **Tracking**:
 ```
-Status: Not started
-Est. Completion: 
+Status: Complete
+Est. Completion: Aug 16, 2026
 Commit: (pending)
 ```
 
@@ -422,13 +422,13 @@ Commit: (pending)
 - [ ] Install `zustand` for state management
 - [x] Create component structure (dark mode primary)
 - [x] Apply gradient styling from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
-- [ ] Implement debounced search input
-- [ ] Add search history (localStorage)
+- [x] Implement debounced search input
+- [x] Add search history (localStorage)
 - [ ] Commit: `feat(components): add SearchBar component with dark mode styling`
 
 **Tracking**:
 ```
-Status: In progress
+Status: Near complete
 Est. Completion: Aug 16, 2026
 Commit: (pending)
 Colors Used: #A78BFA (purple), #7DD3FC (blue)
@@ -462,8 +462,8 @@ Commit: (pending)
 
 #### Task 6: Build UploadModal Component → `src/components/UploadModal.tsx`
 - [x] Create text-based upload modal (temporary, before PDF parser)
-- [ ] Create drag-and-drop zone
-- [ ] File validation (PDF, < 10MB)
+- [x] Create drag-and-drop zone
+- [x] File validation (PDF, < 10MB)
 - [x] Upload submitting state
 - [x] Inline success/error feedback
 - [ ] Commit: `feat(components): add UploadModal with drag-drop support`
@@ -537,7 +537,7 @@ Track when each library is installed below.
 |---------|---------|---------|-----------------|--------|
 | `zustand` | latest | State management | `npm install zustand` | ⏳ To install |
 | `react-hot-toast` | latest | Toast notifications | `npm install react-hot-toast` | ⏳ To install |
-| `pdfjs-dist` | latest | PDF parsing | `npm install pdfjs-dist` | ⏳ To install |
+| `pdfjs-dist` | latest | PDF parsing | `npm install pdfjs-dist` | ✅ Installed (Aug 16) |
 | `clsx` | latest | Class utilities | `npm install clsx` | ⏳ To install |
 
 ### Phase 5-6 (Features & Performance)

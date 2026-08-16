@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ResumeCard, type ResumeResult } from "@/src/components/ResumeCard";
 import { SearchBar } from "@/src/components/SearchBar";
@@ -43,8 +43,10 @@ export default function Home() {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
   };
 
-  const runSearch = async () => {
-    if (!query.trim()) {
+  const runSearch = useCallback(async (queryOverride?: string) => {
+    const activeQuery = (queryOverride ?? query).trim();
+
+    if (!activeQuery) {
       setError("Enter a search query first.");
       return;
     }
@@ -59,7 +61,7 @@ export default function Home() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query,
+          query: activeQuery,
           threshold: 0.35,
           count: 12,
         }),
@@ -78,7 +80,7 @@ export default function Home() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [query]);
 
   const summary = useMemo(() => {
     if (results.length === 0) {

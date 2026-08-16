@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { extractTextFromPdfBuffer, MAX_PDF_SIZE_BYTES } from "../../../lib/pdfParser";
+import { extractResumeMetadata } from "../../../lib/resumeMetadata";
 import { generateEmbedding } from "../../../lib/transformers";
 import { supabase } from "../../../lib/supabaseClient";
 
@@ -13,25 +15,62 @@ type ParseRequestBody = {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as string | ParseRequestBody;
+    const contentType = request.headers.get("content-type") || "";
+    let rawText = "";
 
-    const rawText =
-      typeof body === "string"
-        ? body
-        : body.text ?? body.rawText ?? body.raw_text;
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const file = formData.get("resume");
+
+      if (!(file instanceof File)) {
+        return NextResponse.json(
+          { error: "Expected a PDF file with form field name 'resume'." },
+          { status: 400 },
+        );
+      }
+
+      const isPdfMime = file.type === "application/pdf";
+      const isPdfName = file.name.toLowerCase().endsWith(".pdf");
+
+      if (!isPdfMime && !isPdfName) {
+        return NextResponse.json(
+          { error: "Only PDF files are supported." },
+          { status: 400 },
+        );
+      }
+
+      if (file.size > MAX_PDF_SIZE_BYTES) {
+        return NextResponse.json(
+          { error: "PDF size must be 10MB or less." },
+          { status: 400 },
+        );
+      }
+
+      rawText = await extractTextFromPdfBuffer(await file.arrayBuffer());
+    } else {
+      const body = (await request.json()) as string | ParseRequestBody;
+      rawText =
+        typeof body === "string"
+          ? body
+          : body.text ?? body.rawText ?? body.raw_text ?? "";
+    }
 
     if (typeof rawText !== "string" || rawText.trim().length === 0) {
       return NextResponse.json(
-        { error: "A non-empty raw text string is required." },
+        { error: "No usable text found in the uploaded resume." },
         { status: 400 },
       );
     }
 
+    const { candidateName, email, skills } = extractResumeMetadata(rawText);
     const embedding = await generateEmbedding(rawText);
 
     const { data, error } = await supabase
       .from("resumes")
       .insert({
+        candidate_name: candidateName,
+        email,
+        skills,
         raw_text: rawText,
         embedding,
       })
