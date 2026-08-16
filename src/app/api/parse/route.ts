@@ -93,6 +93,14 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error.";
+    
+    // Distinguish between unprocessable entities (e.g. image-based PDFs) and internal server errors
+    if (message.includes("Could not extract any text") || message.includes("no readable text was found") || message.includes("No usable text found")) {
+      return NextResponse.json(
+        { error: message },
+        { status: 422 }, // Unprocessable Entity
+      );
+    }
 
     return NextResponse.json(
       { error: `Failed to process resume text: ${message}` },

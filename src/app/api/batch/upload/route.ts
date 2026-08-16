@@ -93,6 +93,14 @@ export async function POST(request: Request) {
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error.";
+    
+    if (message.includes("Could not extract any text") || message.includes("no readable text was found") || message.includes("No usable text found")) {
+      return NextResponse.json(
+        { error: message },
+        { status: 422 },
+      );
+    }
+    
     return NextResponse.json({ error: `Batch upload failed: ${message}` }, { status: 500 });
   }
 }
