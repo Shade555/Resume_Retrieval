@@ -54,23 +54,47 @@ export default function Home() {
       </div>
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <header className="rounded-3xl border border-white/10 bg-[linear-gradient(125deg,rgba(18,18,25,0.88),rgba(24,24,35,0.76))] p-6 shadow-[0_18px_38px_rgba(0,0,0,0.35)] backdrop-blur-md">
+        <header 
+          className="rounded-3xl border p-6 backdrop-blur-md"
+          style={{ 
+            background: 'var(--header-bg)',
+            borderColor: 'var(--header-border)',
+            boxShadow: 'var(--header-shadow)'
+          }}
+        >
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-[#bca7ff]">AI Resume Retrieval</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Find the right candidate with semantic search
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl flex flex-wrap gap-x-[0.25em]">
+                {["Find", "the", "right", "candidate", "with", "semantic", "search"].map((word, i) => (
+                  <span key={i} className="overflow-hidden inline-flex">
+                    <span 
+                      className="inline-block animate-slot-reveal opacity-0" 
+                      style={{ animationDelay: `${i * 50 + 100}ms` }}
+                    >
+                      {word}
+                    </span>
+                  </span>
+                ))}
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
-                Local embeddings, vector similarity, and a matte gradient interface built for high-signal hiring workflows.
-              </p>
+              <div className="overflow-hidden">
+                <p 
+                  className="mt-4 max-w-3xl text-sm leading-7 text-[var(--text-secondary)] opacity-0 animate-slot-reveal"
+                  style={{ animationDelay: '500ms' }}
+                >
+                  Local embeddings, vector similarity, and a matte gradient interface built for high-signal hiring workflows.
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 self-start sm:flex-row">
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="rounded-xl border border-white/15 bg-black/20 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/35"
+                className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+                style={{ backgroundColor: 'var(--btn-bg)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--btn-hover)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--btn-bg)')}
               >
                 {theme === "dark" ? "Switch to light" : "Switch to dark"}
               </button>
@@ -80,7 +104,8 @@ export default function Home() {
                     const { logout } = await import("./login/actions");
                     await logout();
                   }}
-                  className="rounded-xl border border-white/15 bg-black/20 px-4 py-2 text-sm text-red-400 hover:bg-red-950/30"
+                  className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-red-500 transition-colors hover:bg-red-500/10"
+                  style={{ backgroundColor: 'var(--btn-bg)' }}
                 >
                   Log out
                 </button>
@@ -115,7 +140,7 @@ export default function Home() {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/5"
+                    className="h-44 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--panel-alt)]"
                   />
                 ))}
               </section>
@@ -126,12 +151,12 @@ export default function Home() {
                 ))}
               </section>
             ) : query ? (
-              <div className="mt-2 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 py-16 text-center shadow-inner">
-                <svg className="mb-4 h-12 w-12 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="mt-2 flex flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--panel)] py-16 text-center shadow-sm">
+                <svg className="mb-4 h-12 w-12 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <h3 className="text-lg font-medium text-white">No candidates found</h3>
-                <p className="mt-2 text-sm text-zinc-400">Try adjusting your search terms or lowering your criteria.</p>
+                <h3 className="text-lg font-medium text-[var(--text-primary)]">No candidates found</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">Try adjusting your search terms or lowering your criteria.</p>
               </div>
             ) : null}
 

@@ -111,14 +111,14 @@ export function UploadModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#121219] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-100">Upload Resume PDF</h2>
+      <div className="w-full max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
+        <div className="mb-4 flex items-center justify-between border-b border-[var(--border)] pb-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Upload Resume PDF</h2>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-lg border border-white/20 px-3 py-1 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-50"
+            className="rounded-lg border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] hover:bg-[var(--btn-bg)] hover:text-[var(--text-primary)] disabled:opacity-50"
           >
             Close
           </button>
@@ -163,8 +163,8 @@ export function UploadModal() {
             isDragging
               ? "border-[#7dd3fc] bg-[#7dd3fc]/10"
               : isSubmitting 
-              ? "border-white/10 bg-[#1a1a24] opacity-80 cursor-not-allowed"
-              : "border-white/20 bg-[#1a1a24] hover:border-white/35 cursor-pointer"
+              ? "border-[var(--border)] bg-[var(--panel-alt)] opacity-80 cursor-not-allowed"
+              : "border-[var(--border)] bg-[var(--panel-alt)] hover:border-[#a78bfa] cursor-pointer"
           }`}
         >
           {isSubmitting && (
@@ -174,31 +174,38 @@ export function UploadModal() {
             />
           )}
           
-          <p className="text-sm font-medium text-zinc-100">
-            {isSubmitting ? `Uploading... ${uploadProgress}%` : "Drag and drop your PDFs here"}
-          </p>
-          <p className="mt-2 text-xs text-zinc-400">or click to browse files (max 10MB per file)</p>
+          <div className="flex flex-col items-center justify-center">
+            <svg className="mb-3 h-10 w-10 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {isSubmitting ? `Uploading... ${uploadProgress}%` : (selectedFiles.length > 0 ? `${selectedFiles.length} files selected` : "Drag and drop your PDF resumes here")}
+            </p>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">or click to browse files (max 10MB per file)</p>
+          </div>
           
           {selectedFiles.length > 0 && !isSubmitting && (
-            <div className="mt-4 flex flex-col gap-2 max-h-32 overflow-y-auto w-full custom-scrollbar">
-              <p className="text-xs text-zinc-300 font-semibold mb-1">
-                {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected ({bytesToMb(totalSize)}MB total)
+            <div className="mt-4 w-full">
+              <p className="text-xs text-[var(--text-secondary)] font-semibold mb-1 text-left">
+                Selected files ({selectedFiles.length}):
               </p>
-              {selectedFiles.map((f, i) => (
-                <div key={i} className="flex justify-between items-center rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-zinc-300">
-                  <span className="truncate max-w-[80%]">{f.name}</span>
-                  <button 
-                    type="button" 
-                    className="text-zinc-500 hover:text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFiles(prev => prev.filter((_, idx) => idx !== i));
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
+              <div className="max-h-32 overflow-y-auto flex flex-col gap-2 custom-scrollbar">
+                {selectedFiles.map((f, i) => (
+                  <div key={i} className="flex justify-between items-center rounded-lg border border-[var(--border)] bg-[var(--panel-alt)] px-3 py-1.5 text-xs text-[var(--text-primary)]">
+                    <span className="truncate max-w-[80%]">{f.name}</span>
+                    <button 
+                      type="button" 
+                      className="text-[var(--text-secondary)] hover:text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFiles(prev => prev.filter((_, idx) => idx !== i));
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -222,7 +229,7 @@ export function UploadModal() {
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-50"
+            className="rounded-xl border border-[var(--border)] bg-[var(--btn-bg)] px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--btn-hover)] disabled:opacity-50"
           >
             Cancel
           </button>

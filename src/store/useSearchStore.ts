@@ -78,7 +78,16 @@ export const useSearchStore = create<SearchState>((set, get) => ({
 
   toggleTheme: () => {
     const newTheme = get().theme === "dark" ? "light" : "dark";
-    get().setTheme(newTheme);
+    
+    // @ts-ignore
+    if (typeof document !== "undefined" && document.startViewTransition) {
+      // @ts-ignore
+      document.startViewTransition(() => {
+        get().setTheme(newTheme);
+      });
+    } else {
+      get().setTheme(newTheme);
+    }
   },
 
   initializeTheme: () => {

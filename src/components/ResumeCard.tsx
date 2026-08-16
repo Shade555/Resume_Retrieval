@@ -84,9 +84,9 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
     <>
       <article 
         className={clsx(
-          "rounded-2xl border border-white/10 bg-[#15151c] p-5 shadow-[0_10px_28px_rgba(0,0,0,0.3)]",
+          "rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-5 shadow-sm",
           "flex flex-col h-full relative transition-colors",
-          isSelected && "border-[#7dd3fc]/50 bg-[#7dd3fc]/5"
+          isSelected && "border-[#7dd3fc]/50 bg-[#7dd3fc]/10"
         )}
       >
         <div className="absolute top-5 right-5 flex items-center gap-2">
@@ -94,7 +94,7 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
             onClick={() => toggleFlag(resume.id)}
             className={clsx(
               "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
-              isFlagged ? "bg-amber-500/20 text-amber-400" : "bg-black/20 text-zinc-500 hover:text-zinc-300"
+              isFlagged ? "bg-amber-500/20 text-amber-500" : "bg-[var(--panel-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
             title={isFlagged ? "Remove star" : "Star candidate"}
           >
@@ -107,12 +107,12 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
             onClick={() => toggleResumeSelection(resume.id)}
             className={clsx(
               "flex h-5 w-5 items-center justify-center rounded border transition-colors",
-              isSelected ? "bg-[#7dd3fc] border-[#7dd3fc]" : "border-zinc-500 bg-black/20 hover:border-zinc-400"
+              isSelected ? "bg-[#7dd3fc] border-[#7dd3fc]" : "border-[var(--text-secondary)] bg-[var(--panel-alt)] hover:border-[var(--text-primary)]"
             )}
             title={isSelected ? "Deselect" : "Select for export"}
           >
             {isSelected && (
-              <svg className="h-3.5 w-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-3.5 w-3.5 text-[var(--panel)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             )}
@@ -121,12 +121,12 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
 
         <div className="flex items-start justify-between gap-3 pr-16">
           <div>
-            <h3 className="text-lg font-semibold text-zinc-100">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               {resume.candidate_name || "Unnamed Candidate"}
             </h3>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-[var(--text-secondary)]">
               {resume.email ? (
-                <a href={`mailto:${resume.email}`} className="hover:text-zinc-200 transition-colors">
+                <a href={`mailto:${resume.email}`} className="hover:text-[var(--text-primary)] transition-colors">
                   {resume.email}
                 </a>
               ) : "No email provided"}
@@ -148,14 +148,14 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
           ))}
         </div>
 
-        <p className="mt-4 text-sm leading-6 text-zinc-300 flex-1">
+        <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)] flex-1">
           <HighlightedText text={snippet} query={query} />
         </p>
         
-        <div className="mt-4 pt-4 border-t border-white/10">
+        <div className="mt-4 pt-4 border-t border-[var(--border)]">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-sm text-[var(--dark-blue)] hover:text-[#bae6fd] transition-colors font-medium"
+            className="text-sm text-[#a78bfa] hover:text-[#c4b5fd] transition-colors font-medium"
           >
             View full resume
           </button>
@@ -164,13 +164,13 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#15151c] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#1a1a24]">
+          <div className="bg-[var(--panel)] border border-[var(--border)] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--border)] bg-[var(--panel-alt)]">
               <div>
-                <h2 className="text-xl font-semibold text-white">{resume.candidate_name || "Unnamed Candidate"}</h2>
-                <p className="text-sm text-zinc-400 mt-1">
+                <h2 className="text-xl font-semibold text-[var(--text-primary)]">{resume.candidate_name || "Unnamed Candidate"}</h2>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   {resume.email ? (
-                    <a href={`mailto:${resume.email}`} className="hover:text-zinc-200 transition-colors">
+                    <a href={`mailto:${resume.email}`} className="hover:text-[var(--text-primary)] transition-colors">
                       {resume.email}
                     </a>
                   ) : "No email provided"}
@@ -178,7 +178,7 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--panel)] transition-colors"
               >
                 Close
               </button>
@@ -197,7 +197,7 @@ export function ResumeCard({ resume, query }: ResumeCardProps) {
               </div>
               
               <div className="prose prose-invert max-w-none">
-                <p className="whitespace-pre-wrap text-zinc-300 text-sm leading-relaxed">
+                <p className="whitespace-pre-wrap text-[var(--text-primary)] text-sm leading-relaxed">
                   <HighlightedText text={resume.raw_text || ""} query={query} />
                 </p>
               </div>

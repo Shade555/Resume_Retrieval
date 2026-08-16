@@ -44,24 +44,24 @@ export function ExportBar() {
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-2xl px-4 animate-in slide-in-from-bottom-10 fade-in duration-300">
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#121219]/90 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--panel)]/90 p-4 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7dd3fc]/20 text-sm font-semibold text-[#7dd3fc]">
             {selectedResumeIds.size}
           </span>
-          <span className="text-sm font-medium text-white">Candidates selected</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">Candidates selected</span>
           
-          <div className="h-4 w-px bg-white/10 mx-2" />
+          <div className="h-4 w-px bg-[var(--border)] mx-2" />
           
           <button 
             onClick={selectAllResults}
-            className="text-xs text-zinc-400 hover:text-white transition-colors"
+            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             Select All
           </button>
           <button 
             onClick={clearSelection}
-            className="text-xs text-zinc-400 hover:text-white transition-colors"
+            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             Clear
           </button>
@@ -70,7 +70,7 @@ export function ExportBar() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            className="flex items-center gap-2 rounded-xl bg-[var(--btn-bg)] border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--btn-hover)]"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
