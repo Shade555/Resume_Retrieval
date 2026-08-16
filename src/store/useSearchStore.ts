@@ -175,12 +175,29 @@ export const useSearchStore = create<SearchState>((set, get) => ({
         throw new Error(data.error || "Search request failed.");
       }
 
-      set((state) => ({ 
-        results: activePage === 1 ? (data.results || []) : [...state.results, ...(data.results || [])], 
-        hasNextPage: data.hasNextPage || false,
-        page: activePage,
-        limit: activeLimit
-      }));
+      set((state) => {
+        const newResults = data.results || [];
+        
+        if (activePage === 1) {
+          return {
+            results: newResults,
+            hasNextPage: data.hasNextPage || false,
+            page: activePage,
+            limit: activeLimit,
+          };
+        }
+
+        // Deduplicate appending results
+        const existingIds = new Set(state.results.map(r => r.id));
+        const filteredNewResults = newResults.filter(r => !existingIds.has(r.id));
+
+        return {
+          results: [...state.results, ...filteredNewResults],
+          hasNextPage: data.hasNextPage || false,
+          page: activePage,
+          limit: activeLimit,
+        };
+      });
     } catch (searchError) {
       toast.error(searchError instanceof Error ? searchError.message : "Unknown search error.");
       set({ results: [], hasNextPage: false });

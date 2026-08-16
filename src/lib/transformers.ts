@@ -3,6 +3,12 @@ import { env, pipeline } from "@huggingface/transformers";
 env.allowRemoteModels = true;
 env.allowLocalModels = true;
 
+// Vercel serverless functions only allow writing to /tmp
+// Without this, transformers.js will crash with a read-only file system error
+if (process.env.VERCEL) {
+  env.cacheDir = "/tmp";
+}
+
 const embeddingModel = "Xenova/all-MiniLM-L6-v2";
 
 type FeatureExtractionPipeline = Awaited<ReturnType<typeof pipeline>>;
