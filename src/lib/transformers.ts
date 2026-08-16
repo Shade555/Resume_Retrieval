@@ -1,13 +1,13 @@
 import { env, pipeline } from "@huggingface/transformers";
+import path from "path";
 
-env.allowRemoteModels = true;
+// Tell transformers.js to look for models in our local bundled directory
+env.localModelPath = path.join(process.cwd(), "models");
+env.allowRemoteModels = false; // Never download on the fly (prevents Vercel 10s timeout)
 env.allowLocalModels = true;
 
-// Vercel serverless functions only allow writing to /tmp
-// Without this, transformers.js will crash with a read-only file system error
-if (process.env.VERCEL) {
-  env.cacheDir = "/tmp";
-}
+// Prevent writing to /tmp since we are completely read-only now
+env.useCache = false;
 
 const embeddingModel = "Xenova/all-MiniLM-L6-v2";
 

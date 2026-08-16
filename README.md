@@ -19,6 +19,29 @@ AI-powered semantic resume retrieval built with Next.js, Supabase, pgvector, and
 	- resumes table including embedding vector(384)
 	- match_resumes RPC function
 
+## Production Deployment (Vercel)
+
+This project is fully optimized for Vercel's free serverless tier. Since Vercel Serverless Functions have a strict 10-second timeout, downloading large AI models on-the-fly will cause a `500 Internal Server Error`. 
+
+To solve this, we use a **Model Bundling** architecture:
+1. The `onnxruntime-node` native C++ binary is explicitly excluded from Webpack via `serverExternalPackages` in `next.config.ts`.
+2. The `Xenova/all-MiniLM-L6-v2` model is downloaded directly into the local `./models` directory using the provided `scripts/download-model.mjs`.
+3. Vercel is instructed to upload this `./models` directory into the Serverless environment via `outputFileTracingIncludes`.
+4. `transformers.js` is configured to **strictly read from the local disk** (`env.allowRemoteModels = false`).
+
+This completely eliminates network downloading during a serverless "cold start," allowing the AI to boot and run inference in under 3 seconds—well within Vercel's 10-second limit.
+
+### Prerequisites for Vercel Deployment
+
+Before pushing to Vercel, you must run the model download script locally so the model is committed to your repository:
+
+```bash
+npm run setup:model
+git add models/
+git commit -m "chore: bundle local ai model for vercel"
+git push
+```
+
 ## External Services Setup & Environment Variables
 
 This project relies on a few critical external services. Create a `.env.local` file in the root of your project and configure the following variables.
