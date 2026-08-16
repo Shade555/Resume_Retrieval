@@ -6,9 +6,6 @@ env.localModelPath = path.join(process.cwd(), "models");
 env.allowRemoteModels = false; // Never download on the fly (prevents Vercel 10s timeout)
 env.allowLocalModels = true;
 
-// Prevent writing to /tmp since we are completely read-only now
-env.useCache = false;
-
 const embeddingModel = "Xenova/all-MiniLM-L6-v2";
 
 type FeatureExtractionPipeline = Awaited<ReturnType<typeof pipeline>>;
