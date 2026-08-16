@@ -32,7 +32,7 @@ export async function getEmbeddingPipeline() {
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   const extractor = await getEmbeddingPipeline();
-  const output = await extractor(text, {
+  const output = await (extractor as any)(text, {
     pooling: "mean",
     normalize: true,
   });
