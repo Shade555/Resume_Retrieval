@@ -66,13 +66,26 @@ export default function Home() {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="self-start rounded-xl border border-white/15 bg-black/20 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/35"
-            >
-              {theme === "dark" ? "Switch to light" : "Switch to dark"}
-            </button>
+            <div className="flex flex-col gap-2 self-start sm:flex-row">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="rounded-xl border border-white/15 bg-black/20 px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/35"
+              >
+                {theme === "dark" ? "Switch to light" : "Switch to dark"}
+              </button>
+              <form action="/login/actions/logout" method="POST">
+                <button
+                  formAction={async () => {
+                    const { logout } = await import("./login/actions");
+                    await logout();
+                  }}
+                  className="rounded-xl border border-white/15 bg-black/20 px-4 py-2 text-sm text-red-400 hover:bg-red-950/30"
+                >
+                  Log out
+                </button>
+              </form>
+            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">

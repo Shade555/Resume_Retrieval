@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { extractTextFromPdfBuffer, MAX_PDF_SIZE_BYTES } from "@/src/lib/pdfParser";
 import { extractResumeMetadata } from "@/src/lib/resumeMetadata";
 import { generateEmbedding } from "@/src/lib/transformers";
-import { supabase } from "@/src/lib/supabaseClient";
+import { createClient } from "@/src/utils/supabase/server";
 import { uploadRateLimiter, getClientIp } from "@/src/lib/rateLimit";
 import { logger } from "@/src/lib/logger";
 
@@ -86,6 +86,8 @@ export async function POST(request: Request) {
 
     const { candidateName, email, skills } = extractResumeMetadata(rawText);
     const embedding = await generateEmbedding(rawText);
+
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("resumes")

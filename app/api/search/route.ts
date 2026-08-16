@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateEmbedding } from "@/src/lib/transformers";
-import { supabase } from "@/src/lib/supabaseClient";
+import { createClient } from "@/src/utils/supabase/server";
 import { searchRateLimiter, getClientIp } from "@/src/lib/rateLimit";
 import { redis } from "@/src/lib/redis";
 import { logger } from "@/src/lib/logger";
@@ -99,6 +99,7 @@ export async function POST(request: Request) {
     const matchCount = page * limit + 50;
 
     // Use the RPC function now that it is fixed in the database
+    const supabase = await createClient();
     const { data, error } = await supabase.rpc("match_resumes", {
       query_embedding: queryEmbedding,
       match_threshold: threshold,

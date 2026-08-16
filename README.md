@@ -5,8 +5,10 @@ AI-powered semantic resume retrieval built with Next.js, Supabase, pgvector, and
 ## Tech Stack
 
 - Next.js 16 (App Router, TypeScript)
+- Next.js Middleware (Route Protection & Edge Auth)
 - Tailwind CSS
-- Supabase PostgreSQL with pgvector
+- Supabase PostgreSQL with pgvector (Row Level Security Enabled)
+- Supabase Auth (`@supabase/ssr`)
 - Local embeddings with all-MiniLM-L6-v2 (384 dimensions) via @huggingface/transformers
 
 ## Prerequisites
@@ -17,31 +19,44 @@ AI-powered semantic resume retrieval built with Next.js, Supabase, pgvector, and
 	- resumes table including embedding vector(384)
 	- match_resumes RPC function
 
-## Environment Variables
+## External Services Setup & Environment Variables
 
-Create a .env.local file in project root:
+This project relies on a few critical external services. Create a `.env.local` file in the root of your project and configure the following variables.
 
+### 1. Supabase (Database & pgvector)
+We use Supabase for PostgreSQL and vector storage.
+1. Create a project at [Supabase](https://supabase.com/).
+2. Enable the `pgvector` extension.
+3. Run the SQL script found in `scripts/optimize_db.sql` to create your tables, functions, and HNSW indexes.
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-Optional for privileged server-side operations:
-
-```env
+# Optional (for server-side bypass of RLS)
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-For Rate Limiting & Caching (Phase 6):
+### 2. Hugging Face Transformers.js (Local ML)
+We use `@huggingface/transformers` to generate embeddings directly in your Node.js runtime using the `all-MiniLM-L6-v2` model.
+- **Setup:** None required! The model downloads automatically on the first run and operates locally. No API keys needed.
 
+### 3. Upstash Redis (Caching & Rate Limiting)
+We use Upstash for distributed caching (to skip re-embedding identical queries) and rate-limiting (to protect APIs).
+1. Create a free account at [Upstash](https://upstash.com/).
+2. Create a Redis database.
+3. Scroll down to the REST API section and copy the URL and token.
 ```env
 UPSTASH_REDIS_REST_URL=your_upstash_redis_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ```
 
-For Error Tracking (Phase 6):
+### 4. Sentry (Error Tracking)
+We use Sentry for production crash reporting and performance tracing.
+1. Create a Next.js project at [Sentry.io](https://sentry.io/).
+2. Follow the wizard in your terminal by running `npx @sentry/wizard@latest -i nextjs`.
+3. Save the generated Auth Token to your CI/CD provider, or locally to test.
 ```env
 SENTRY_DSN=your_sentry_dsn
+SENTRY_AUTH_TOKEN=your_generated_sentry_auth_token
 ```
 
 ## Install Dependencies
@@ -127,6 +142,8 @@ Expected:
   - Analyzes the database and aggregates unique skill frequencies
 - `POST /api/batch/upload`
   - Uploads multiple PDF resumes in parallel with strict transaction rollbacks
+
+*Note: All API routes and the dashboard are protected by Next.js Middleware and require Supabase Authentication.*
 
 ## Project Structure (Current)
 
