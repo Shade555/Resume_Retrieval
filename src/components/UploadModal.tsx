@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { useSearchStore } from "@/src/store/useSearchStore";
 
 const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -25,42 +27,44 @@ function getValidationError(file: File | null): string | null {
   return null;
 }
 
-type UploadModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onUploaded: () => void;
-};
+export function UploadModal() {
+  const isOpen = useSearchStore((state) => state.isUploadOpen);
+  const setIsOpen = useSearchStore((state) => state.setIsUploadOpen);
+  const runSearch = useSearchStore((state) => state.runSearch);
+  const query = useSearchStore((state) => state.query);
 
-export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) {
     return null;
   }
 
+  const onClose = () => setIsOpen(false);
+
   const onSelectFile = (file: File | null) => {
     setSelectedFile(file);
-    setError(getValidationError(file));
+    const err = getValidationError(file);
+    if (err) {
+      toast.error(err);
+    }
   };
 
   const handleUpload = async () => {
     const validationError = getValidationError(selectedFile);
 
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError(null);
 
       const formData = new FormData();
-      formData.append("resume", selectedFile);
+      formData.append("resume", selectedFile as Blob);
 
       const response = await fetch("/api/parse", {
         method: "POST",
@@ -73,10 +77,13 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
       }
 
       setSelectedFile(null);
-      onUploaded();
+      toast.success("Resume uploaded successfully!");
+      if (query.trim()) {
+        void runSearch(undefined, 1);
+      }
       onClose();
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Unknown upload error.");
+      toast.error(uploadError instanceof Error ? uploadError.message : "Unknown upload error.");
     } finally {
       setIsSubmitting(false);
     }
@@ -149,8 +156,6 @@ export function UploadModal({ isOpen, onClose, onUploaded }: UploadModalProps) {
             onSelectFile(file || null);
           }}
         />
-
-        {error ? <p className="mt-3 text-sm text-[#fca5a5]">{error}</p> : null}
 
         <div className="mt-4 flex justify-end gap-2">
           <button

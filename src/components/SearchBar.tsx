@@ -1,25 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-
-type SearchBarProps = {
-  query: string;
-  onQueryChange: (value: string) => void;
-  onSearch: (queryOverride?: string) => void;
-  isLoading: boolean;
-  resultCount: number;
-};
+import { useSearchStore } from "@/src/store/useSearchStore";
 
 const HISTORY_KEY = "resume-query-history";
 const AUTO_SEARCH_MIN_CHARS = 3;
 
-export function SearchBar({
-  query,
-  onQueryChange,
-  onSearch,
-  isLoading,
-  resultCount,
-}: SearchBarProps) {
+export function SearchBar() {
+  const query = useSearchStore((state) => state.query);
+  const setQuery = useSearchStore((state) => state.setQuery);
+  const runSearch = useSearchStore((state) => state.runSearch);
+  const isLoading = useSearchStore((state) => state.isSearching);
+  const resultCount = useSearchStore((state) => state.results.length);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [history, setHistory] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -68,11 +61,11 @@ export function SearchBar({
     }
 
     const timer = window.setTimeout(() => {
-      onSearch(trimmed);
+      void runSearch(trimmed);
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [query, onSearch]);
+  }, [query, runSearch]);
 
   const filteredHistory = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -106,11 +99,11 @@ export function SearchBar({
     }
 
     if (override && override !== query) {
-      onQueryChange(term);
+      setQuery(term);
     }
 
     persistHistory(term);
-    onSearch(term);
+    void runSearch(term);
     setIsHistoryOpen(false);
   };
 
@@ -124,7 +117,7 @@ export function SearchBar({
           ref={inputRef}
           id="resume-query"
           value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
+          onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setIsHistoryOpen(true)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -141,7 +134,7 @@ export function SearchBar({
           <button
             type="button"
             onClick={() => {
-              onQueryChange("");
+              setQuery("");
               setIsHistoryOpen(false);
             }}
             className="rounded-xl border border-white/15 px-4 py-3 text-sm text-zinc-200 hover:bg-white/5"

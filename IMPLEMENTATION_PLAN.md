@@ -439,28 +439,28 @@ Colors Used: #A78BFA (purple), #7DD3FC (blue)
 - [x] Generate embedding using pipeline
 - [x] Call Supabase RPC `match_resumes()`
 - [x] Return ranked results with relevance scores
-- [ ] Add pagination support
+- [x] Add pagination support
 - [x] Error handling for invalid queries
 - [ ] Commit: `feat(api): add search endpoint with similarity matching`
 
 **Tracking**:
 ```
-Status: In progress
+Status: Complete
 Est. Completion: Aug 16, 2026
 Commit: (pending)
 ```
 
 ### SHORT-TERM (Weeks 2-3)
 
-#### Task 5: Build ResumeCard Component → `src/components/ResumeCard.tsx`
-- [ ] Install `clsx` for conditional classes
+#### Task 5: Build ResumeCard Component ✅ → `src/components/ResumeCard.tsx`
+- [x] Install `clsx` for conditional classes
 - [x] Display candidate name, email, relevance score
 - [x] Show skills as styled badges (use DESIGN_SYSTEM.md colors)
-- [ ] Highlight matching keywords in preview
-- [ ] Add expand/collapse for full text view
+- [x] Highlight matching keywords in preview
+- [x] Add expand/collapse for full text view
 - [ ] Commit: `feat(components): add ResumeCard with relevance scoring`
 
-#### Task 6: Build UploadModal Component → `src/components/UploadModal.tsx`
+#### Task 6: Build UploadModal Component ✅ → `src/components/UploadModal.tsx`
 - [x] Create text-based upload modal (temporary, before PDF parser)
 - [x] Create drag-and-drop zone
 - [x] File validation (PDF, < 10MB)
@@ -468,17 +468,17 @@ Commit: (pending)
 - [x] Inline success/error feedback
 - [ ] Commit: `feat(components): add UploadModal with drag-drop support`
 
-#### Task 7: Update Main Dashboard → `src/app/page.tsx`
+#### Task 7: Update Main Dashboard ✅ → `src/app/page.tsx`
 - [x] Assemble all components (SearchBar, UploadModal, ResumeCard[])
 - [x] Apply dark mode gradient background
-- [ ] Implement Zustand state management
+- [x] Implement Zustand state management
 - [x] Responsive grid layout
 - [ ] Commit: `feat(ui): integrate all components into main dashboard`
 
 #### Task 8: Add Error Handling & Toast Notifications
-- [ ] Install `react-hot-toast`
+- [x] Install `react-hot-toast`
 - [ ] Create error boundaries
-- [ ] Add toast component for feedback
+- [x] Add toast component for feedback
 - [ ] Graceful degradation for errors
 - [ ] Commit: `feat(error-handling): add error boundaries and toast notifications`
 
@@ -535,10 +535,10 @@ Track when each library is installed below.
 
 | Package | Version | Purpose | Install Command | Status |
 |---------|---------|---------|-----------------|--------|
-| `zustand` | latest | State management | `npm install zustand` | ⏳ To install |
-| `react-hot-toast` | latest | Toast notifications | `npm install react-hot-toast` | ⏳ To install |
+| `zustand` | latest | State management | `npm install zustand` | ✅ Installed (Aug 16) |
+| `react-hot-toast` | latest | Toast notifications | `npm install react-hot-toast` | ✅ Installed (Aug 16) |
 | `pdfjs-dist` | latest | PDF parsing | `npm install pdfjs-dist` | ✅ Installed (Aug 16) |
-| `clsx` | latest | Class utilities | `npm install clsx` | ⏳ To install |
+| `clsx` | latest | Class utilities | `npm install clsx` | ✅ Installed (Aug 16) |
 
 ### Phase 5-6 (Features & Performance)
 

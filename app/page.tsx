@@ -1,86 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
-import { ResumeCard, type ResumeResult } from "@/src/components/ResumeCard";
+import { ResumeCard } from "@/src/components/ResumeCard";
 import { SearchBar } from "@/src/components/SearchBar";
 import { UploadModal } from "@/src/components/UploadModal";
-
-type SearchResponse = {
-  results?: ResumeResult[];
-  error?: string;
-};
-
-type ThemeMode = "dark" | "light";
+import { useSearchStore } from "@/src/store/useSearchStore";
 
 export default function Home() {
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") {
-      return "dark";
-    }
-
-    return window.localStorage.getItem("theme") === "light" ? "light" : "dark";
-  });
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ResumeResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const theme = useSearchStore((state) => state.theme);
+  const toggleTheme = useSearchStore((state) => state.toggleTheme);
+  const initializeTheme = useSearchStore((state) => state.initializeTheme);
+  const query = useSearchStore((state) => state.query);
+  const results = useSearchStore((state) => state.results);
+  const isSearching = useSearchStore((state) => state.isSearching);
+  const setIsUploadOpen = useSearchStore((state) => state.setIsUploadOpen);
+  const page = useSearchStore((state) => state.page);
+  const limit = useSearchStore((state) => state.limit);
+  const hasNextPage = useSearchStore((state) => state.hasNextPage);
+  const runSearch = useSearchStore((state) => state.runSearch);
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (theme === "light") {
-      root.classList.add("theme-light");
-    } else {
-      root.classList.remove("theme-light");
-    }
-
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
-  };
-
-  const runSearch = useCallback(async (queryOverride?: string) => {
-    const activeQuery = (queryOverride ?? query).trim();
-
-    if (!activeQuery) {
-      setError("Enter a search query first.");
-      return;
-    }
-
-    try {
-      setIsSearching(true);
-      setError(null);
-
-      const response = await fetch("/api/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: activeQuery,
-          threshold: 0.35,
-          count: 12,
-        }),
-      });
-
-      const data = (await response.json()) as SearchResponse;
-
-      if (!response.ok) {
-        throw new Error(data.error || "Search request failed.");
-      }
-
-      setResults(data.results || []);
-    } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : "Unknown search error.");
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [query]);
+    initializeTheme();
+  }, [initializeTheme]);
 
   const summary = useMemo(() => {
     if (results.length === 0) {
@@ -134,19 +76,7 @@ export default function Home() {
           </div>
         </header>
 
-        <SearchBar
-          query={query}
-          onQueryChange={setQuery}
-          onSearch={runSearch}
-          isLoading={isSearching}
-          resultCount={results.length}
-        />
-
-        {error ? (
-          <p className="rounded-xl border border-[#fca5a5]/25 bg-[#fca5a5]/10 px-4 py-3 text-sm text-[#ffd5d5]">
-            {error}
-          </p>
-        ) : null}
+        <SearchBar />
 
         {isSearching ? (
           <section className="grid gap-4 md:grid-cols-2">
@@ -160,21 +90,54 @@ export default function Home() {
         ) : (
           <section className="grid gap-4 md:grid-cols-2">
             {results.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} />
+              <ResumeCard key={resume.id} resume={resume} query={query} />
             ))}
           </section>
         )}
+
+        {results.length > 0 && !isSearching && (
+          <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[var(--text-secondary)]">Results per page:</span>
+              <select
+                value={limit}
+                onChange={(e) => {
+                  const newLimit = parseInt(e.target.value, 10);
+                  void runSearch(undefined, 1, newLimit);
+                }}
+                className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--dark-purple)]"
+              >
+                <option value={12}>12</option>
+                <option value={24}>24</option>
+                <option value={48}>48</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void runSearch(undefined, Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-[var(--text-secondary)]">
+                Page {page}
+              </span>
+              <button
+                type="button"
+                onClick={() => void runSearch(undefined, page + 1)}
+                disabled={!hasNextPage}
+                className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
-      <UploadModal
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-        onUploaded={() => {
-          if (query.trim()) {
-            void runSearch();
-          }
-        }}
-      />
+      <UploadModal />
     </div>
   );
 }
