@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { generateEmbedding } from "../../../lib/transformers";
-import { supabase } from "../../../lib/supabaseClient";
+import { generateEmbedding } from "@/src/lib/transformers";
+import { supabase } from "@/src/lib/supabaseClient";
 
 export const runtime = "nodejs";
 
@@ -10,6 +10,7 @@ type SearchRequestBody = {
   threshold?: number;
   page?: number;
   limit?: number;
+  skills?: string[];
 };
 
 type SearchResultRow = {
@@ -25,9 +26,10 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as SearchRequestBody;
     const query = body.query?.trim() || "";
-    const threshold = typeof body.threshold === "number" ? body.threshold : 0.35;
+    const threshold = typeof body.threshold === "number" ? body.threshold : 0.0;
     const page = typeof body.page === "number" ? body.page : 1;
     const limit = typeof body.limit === "number" ? body.limit : 12;
+    const selectedSkills = Array.isArray(body.skills) ? body.skills : [];
 
     if (!query) {
       return NextResponse.json(
@@ -36,9 +38,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (threshold < 0 || threshold > 1) {
+    if (threshold < -1 || threshold > 1) {
       return NextResponse.json(
-        { error: "Threshold must be between 0 and 1." },
+        { error: "Threshold must be between -1 and 1." },
         { status: 400 },
       );
     }
@@ -58,14 +60,14 @@ export async function POST(request: Request) {
     }
 
     const queryEmbedding = await generateEmbedding(query);
+    // Request more matches to allow for filtering and pagination
+    const matchCount = page * limit + 50;
 
-    const matchCount = page * limit;
-    
-    // We request up to matchCount + 1 to check if there is a next page.
+    // Use the RPC function now that it is fixed in the database
     const { data, error } = await supabase.rpc("match_resumes", {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
-      match_count: matchCount + 1,
+      match_count: matchCount,
     });
 
     if (error) {
@@ -75,11 +77,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const results = ((data || []) as SearchResultRow[]);
-    const hasNextPage = results.length > matchCount;
+    let results = ((data || []) as SearchResultRow[]);
+    
+    // Apply additional skills filtering in JavaScript
+    if (selectedSkills.length > 0) {
+      results = results.filter((resume) => {
+        if (!resume.skills) return false;
+        // Check if resume has ALL selected skills
+        return selectedSkills.every((skill) => 
+          resume.skills!.some(s => s.toLowerCase() === skill.toLowerCase())
+        );
+      });
+    }
+
+    const hasNextPage = results.length > page * limit;
     
     if (hasNextPage) {
-      results.pop(); // Remove the extra item
+      results = results.slice(0, page * limit);
     }
 
     const startIndex = (page - 1) * limit;

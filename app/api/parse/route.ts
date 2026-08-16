@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { extractTextFromPdfBuffer, MAX_PDF_SIZE_BYTES } from "../../../lib/pdfParser";
-import { extractResumeMetadata } from "../../../lib/resumeMetadata";
-import { generateEmbedding } from "../../../lib/transformers";
-import { supabase } from "../../../lib/supabaseClient";
+import { extractTextFromPdfBuffer, MAX_PDF_SIZE_BYTES } from "@/src/lib/pdfParser";
+import { extractResumeMetadata } from "@/src/lib/resumeMetadata";
+import { generateEmbedding } from "@/src/lib/transformers";
+import { supabase } from "@/src/lib/supabaseClient";
 
 export const runtime = "nodejs";
 
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error.";
+    const message = error instanceof Error ? error.stack || error.message : "Unknown error.";
     
     // Distinguish between unprocessable entities (e.g. image-based PDFs) and internal server errors
     if (message.includes("Could not extract any text") || message.includes("no readable text was found") || message.includes("No usable text found")) {

@@ -4,6 +4,8 @@ import { useEffect, useMemo } from "react";
 
 import { ResumeCard } from "@/src/components/ResumeCard";
 import { SearchBar } from "@/src/components/SearchBar";
+import { FiltersSidebar } from "@/src/components/FiltersSidebar";
+import { ExportBar } from "@/src/components/ExportBar";
 import { UploadModal } from "@/src/components/UploadModal";
 import { useSearchStore } from "@/src/store/useSearchStore";
 
@@ -78,65 +80,82 @@ export default function Home() {
 
         <SearchBar />
 
-        {isSearching ? (
-          <section className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/5"
-              />
-            ))}
-          </section>
-        ) : (
-          <section className="grid gap-4 md:grid-cols-2">
-            {results.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} query={query} />
-            ))}
-          </section>
-        )}
-
-        {results.length > 0 && !isSearching && (
-          <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-[var(--text-secondary)]">Results per page:</span>
-              <select
-                value={limit}
-                onChange={(e) => {
-                  const newLimit = parseInt(e.target.value, 10);
-                  void runSearch(undefined, 1, newLimit);
-                }}
-                className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--dark-purple)]"
-              >
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-                <option value={48}>48</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => void runSearch(undefined, Math.max(1, page - 1))}
-                disabled={page === 1}
-                className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-[var(--text-secondary)]">
-                Page {page}
-              </span>
-              <button
-                type="button"
-                onClick={() => void runSearch(undefined, page + 1)}
-                disabled={!hasNextPage}
-                className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
-              >
-                Next
-              </button>
-            </div>
+        <div className="flex flex-col lg:flex-row gap-6 mt-2">
+          <div className="w-full lg:w-64 flex-shrink-0">
+            <FiltersSidebar />
           </div>
-        )}
+          
+          <div className="flex-1 min-w-0 flex flex-col">
+            {isSearching ? (
+              <section className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-44 animate-pulse rounded-2xl border border-white/10 bg-white/5"
+                  />
+                ))}
+              </section>
+            ) : results.length > 0 ? (
+              <section className="grid gap-4 md:grid-cols-2">
+                {results.map((resume) => (
+                  <ResumeCard key={resume.id} resume={resume} query={query} />
+                ))}
+              </section>
+            ) : query ? (
+              <div className="mt-2 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 py-16 text-center shadow-inner">
+                <svg className="mb-4 h-12 w-12 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 className="text-lg font-medium text-white">No candidates found</h3>
+                <p className="mt-2 text-sm text-zinc-400">Try adjusting your search terms or lowering your criteria.</p>
+              </div>
+            ) : null}
+
+            {results.length > 0 && !isSearching && (
+              <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-[var(--text-secondary)]">Results per page:</span>
+                  <select
+                    value={limit}
+                    onChange={(e) => {
+                      const newLimit = parseInt(e.target.value, 10);
+                      void runSearch(undefined, 1, newLimit);
+                    }}
+                    className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--dark-purple)]"
+                  >
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                    <option value={48}>48</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void runSearch(undefined, Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    Page {page}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void runSearch(undefined, page + 1)}
+                    disabled={!hasNextPage}
+                    className="rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
 
+      <ExportBar />
       <UploadModal />
     </div>
   );

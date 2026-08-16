@@ -108,7 +108,7 @@ export function SearchBar() {
   };
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-black/20 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur">
+    <section className="relative z-30 rounded-2xl border border-white/10 bg-black/20 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur">
       <div className="relative flex flex-col gap-3 md:flex-row md:items-center">
         <label className="sr-only" htmlFor="resume-query">
           Search resumes

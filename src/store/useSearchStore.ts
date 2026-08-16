@@ -20,12 +20,28 @@ interface SearchState {
   limit: number;
   hasNextPage: boolean;
   
+  // Filters
+  relevanceThreshold: number;
+  selectedSkills: string[];
+  
+  // Bulk Operations
+  selectedResumeIds: Set<string>;
+
+  // Annotations
+  flaggedResumeIds: Set<string>;
+
   // Actions
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
   setQuery: (query: string) => void;
   setIsUploadOpen: (isOpen: boolean) => void;
   setLimit: (limit: number) => void;
+  setRelevanceThreshold: (threshold: number) => void;
+  toggleSkill: (skill: string) => void;
+  toggleResumeSelection: (id: string) => void;
+  clearSelection: () => void;
+  selectAllResults: () => void;
+  toggleFlag: (id: string) => void;
   runSearch: (queryOverride?: string, pageOverride?: number, limitOverride?: number) => Promise<void>;
   initializeTheme: () => void;
 }
@@ -39,6 +55,15 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   page: 1,
   limit: 12,
   hasNextPage: false,
+
+  relevanceThreshold: 0.0,
+  selectedSkills: [],
+  selectedResumeIds: new Set(),
+  flaggedResumeIds: new Set(
+    typeof window !== "undefined"
+      ? JSON.parse(window.localStorage.getItem("flagged-resumes") || "[]")
+      : []
+  ),
 
   setTheme: (theme) => {
     set({ theme });
@@ -71,6 +96,51 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   
   setLimit: (limit) => set({ limit }),
 
+  setRelevanceThreshold: (threshold) => set({ relevanceThreshold: threshold }),
+
+  toggleSkill: (skill) => set((state) => {
+    const isSelected = state.selectedSkills.includes(skill);
+    return {
+      selectedSkills: isSelected 
+        ? state.selectedSkills.filter((s) => s !== skill)
+        : [...state.selectedSkills, skill]
+    };
+  }),
+
+  toggleResumeSelection: (id) => set((state) => {
+    const newSet = new Set(state.selectedResumeIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    return { selectedResumeIds: newSet };
+  }),
+
+  clearSelection: () => set({ selectedResumeIds: new Set() }),
+
+  selectAllResults: () => set((state) => {
+    const newSet = new Set(state.selectedResumeIds);
+    state.results.forEach((r) => newSet.add(r.id));
+    return { selectedResumeIds: newSet };
+  }),
+
+  toggleFlag: (id) => set((state) => {
+    const newSet = new Set(state.flaggedResumeIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    
+    // Persist to local storage
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("flagged-resumes", JSON.stringify(Array.from(newSet)));
+    }
+    
+    return { flaggedResumeIds: newSet };
+  }),
+
   runSearch: async (queryOverride?: string, pageOverride?: number, limitOverride?: number) => {
     const state = get();
     const activeQuery = (queryOverride ?? state.query).trim();
@@ -92,9 +162,10 @@ export const useSearchStore = create<SearchState>((set, get) => ({
         },
         body: JSON.stringify({
           query: activeQuery,
-          threshold: 0.35,
+          threshold: state.relevanceThreshold,
           page: activePage,
           limit: activeLimit,
+          skills: state.selectedSkills, // Pass skills to backend for future usage
         }),
       });
 

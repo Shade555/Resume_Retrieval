@@ -6,7 +6,10 @@ import { useSearchStore } from "@/src/store/useSearchStore";
 
 const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 
-const bytesToMb = (value: number) => (value / (1024 * 1024)).toFixed(1);
+const bytesToMb = (value: number) => {
+  const mb = value / (1024 * 1024);
+  return mb < 0.1 ? mb.toFixed(2) : mb.toFixed(1);
+};
 
 const isPdfFile = (file: File) =>
   file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
