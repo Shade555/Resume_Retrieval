@@ -98,18 +98,17 @@ export default function Home() {
               >
                 {theme === "dark" ? "Switch to light" : "Switch to dark"}
               </button>
-              <form action="/login/actions/logout" method="POST">
-                <button
-                  formAction={async () => {
-                    const { logout } = await import("./login/actions");
-                    await logout();
-                  }}
-                  className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-red-500 transition-colors hover:bg-red-500/10"
-                  style={{ backgroundColor: 'var(--btn-bg)' }}
-                >
-                  Log out
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={async () => {
+                  const { logout } = await import("./login/actions");
+                  await logout();
+                }}
+                className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-red-500 transition-colors hover:bg-red-500/10"
+                style={{ backgroundColor: 'var(--btn-bg)' }}
+              >
+                Log out
+              </button>
             </div>
           </div>
 

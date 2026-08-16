@@ -6,9 +6,6 @@ import { supabase } from "@/src/lib/supabaseClient";
 
 export const runtime = "nodejs";
 
-// 5 minutes max timeout for batch processing
-export const maxDuration = 300; 
-
 export async function POST(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";

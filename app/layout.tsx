@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: "AI-powered semantic resume retrieval with local embeddings.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

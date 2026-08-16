@@ -7,8 +7,6 @@ import { redis } from "@/src/lib/redis";
 import { logger } from "@/src/lib/logger";
 
 export const runtime = "nodejs";
-export const maxDuration = 60; // Allow up to 60s for Hobby tier cold starts
-
 type SearchRequestBody = {
   query?: string;
   threshold?: number;

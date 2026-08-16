@@ -8,7 +8,6 @@ import { uploadRateLimiter, getClientIp } from "@/src/lib/rateLimit";
 import { logger } from "@/src/lib/logger";
 
 export const runtime = "nodejs";
-export const maxDuration = 60; // Allow up to 60s for Hobby tier cold starts
 
 type ParseRequestBody = {
   text?: string;
