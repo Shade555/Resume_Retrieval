@@ -420,33 +420,33 @@ Commit: (pending)
 
 #### Task 3: Build SearchBar Component ✅ → `src/components/SearchBar.tsx`
 - [ ] Install `zustand` for state management
-- [ ] Create component structure (dark mode primary)
-- [ ] Apply gradient styling from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+- [x] Create component structure (dark mode primary)
+- [x] Apply gradient styling from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 - [ ] Implement debounced search input
 - [ ] Add search history (localStorage)
 - [ ] Commit: `feat(components): add SearchBar component with dark mode styling`
 
 **Tracking**:
 ```
-Status: Not started
-Est. Completion: 
+Status: In progress
+Est. Completion: Aug 16, 2026
 Commit: (pending)
 Colors Used: #A78BFA (purple), #7DD3FC (blue)
 ```
 
 #### Task 4: Build Search API ✅ → `src/app/api/search/route.ts`
-- [ ] Accept query string parameter
-- [ ] Generate embedding using pipeline
-- [ ] Call Supabase RPC `match_resumes()`
-- [ ] Return ranked results with relevance scores
+- [x] Accept query string parameter
+- [x] Generate embedding using pipeline
+- [x] Call Supabase RPC `match_resumes()`
+- [x] Return ranked results with relevance scores
 - [ ] Add pagination support
-- [ ] Error handling for invalid queries
+- [x] Error handling for invalid queries
 - [ ] Commit: `feat(api): add search endpoint with similarity matching`
 
 **Tracking**:
 ```
-Status: Not started
-Est. Completion: 
+Status: In progress
+Est. Completion: Aug 16, 2026
 Commit: (pending)
 ```
 
@@ -454,24 +454,25 @@ Commit: (pending)
 
 #### Task 5: Build ResumeCard Component → `src/components/ResumeCard.tsx`
 - [ ] Install `clsx` for conditional classes
-- [ ] Display candidate name, email, relevance score
-- [ ] Show skills as styled badges (use DESIGN_SYSTEM.md colors)
+- [x] Display candidate name, email, relevance score
+- [x] Show skills as styled badges (use DESIGN_SYSTEM.md colors)
 - [ ] Highlight matching keywords in preview
 - [ ] Add expand/collapse for full text view
 - [ ] Commit: `feat(components): add ResumeCard with relevance scoring`
 
 #### Task 6: Build UploadModal Component → `src/components/UploadModal.tsx`
+- [x] Create text-based upload modal (temporary, before PDF parser)
 - [ ] Create drag-and-drop zone
 - [ ] File validation (PDF, < 10MB)
-- [ ] Upload progress indicator
-- [ ] Success/error toast notifications
+- [x] Upload submitting state
+- [x] Inline success/error feedback
 - [ ] Commit: `feat(components): add UploadModal with drag-drop support`
 
 #### Task 7: Update Main Dashboard → `src/app/page.tsx`
-- [ ] Assemble all components (SearchBar, UploadModal, ResumeCard[])
-- [ ] Apply dark mode gradient background
+- [x] Assemble all components (SearchBar, UploadModal, ResumeCard[])
+- [x] Apply dark mode gradient background
 - [ ] Implement Zustand state management
-- [ ] Responsive grid layout
+- [x] Responsive grid layout
 - [ ] Commit: `feat(ui): integrate all components into main dashboard`
 
 #### Task 8: Add Error Handling & Toast Notifications

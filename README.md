@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Resume Retrieval System
 
-## Getting Started
+AI-powered semantic resume retrieval built with Next.js, Supabase, pgvector, and local embeddings using Hugging Face Transformers.js.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 (App Router, TypeScript)
+- Tailwind CSS
+- Supabase PostgreSQL with pgvector
+- Local embeddings with all-MiniLM-L6-v2 (384 dimensions) via @huggingface/transformers
+
+## Prerequisites
+
+- Node.js 18+ (latest LTS recommended)
+- npm
+- Supabase project with:
+	- resumes table including embedding vector(384)
+	- match_resumes RPC function
+
+## Environment Variables
+
+Create a .env.local file in project root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Optional for privileged server-side operations:
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Start Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build and Run Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Lint
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How to Test the App (UI)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Start the app with npm run dev.
+2. Open http://localhost:3000.
+3. Click Add Resume Text and paste raw resume text.
+4. Run a search query, for example: Frontend developer with React experience.
+5. Verify ranked results appear with similarity scores.
 
-## Deploy on Vercel
+Note: The first embedding request can be slower because the model loads locally.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Testing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Parse Endpoint
+
+```bash
+curl -X POST http://localhost:3000/api/parse \
+	-H "Content-Type: application/json" \
+	-d '{"raw_text":"John Doe frontend engineer react typescript"}'
+```
+
+Expected:
+- HTTP 201
+- JSON response with message and resumeId
+
+### Search Endpoint
+
+```bash
+curl -X POST http://localhost:3000/api/search \
+	-H "Content-Type: application/json" \
+	-d '{"query":"Frontend developer with React","threshold":0.35,"count":12}'
+```
+
+Expected:
+- HTTP 200
+- JSON response with ranked results by similarity
+
+## Current API Endpoints
+
+- POST /api/parse
+	- Accepts text, rawText, or raw_text
+	- Generates a 384-dimensional embedding
+	- Stores raw_text and embedding in Supabase
+- POST /api/search
+	- Accepts query, threshold, count
+	- Generates query embedding locally
+	- Calls match_resumes RPC in Supabase
+	- Returns ranked candidate matches
+
+## Project Structure (Current)
+
+- UI page: app/page.tsx
+- Global styles: app/globals.css
+- Parse API: src/app/api/parse/route.ts
+- Search API: src/app/api/search/route.ts
+- Components:
+	- src/components/SearchBar.tsx
+	- src/components/ResumeCard.tsx
+	- src/components/UploadModal.tsx
+- Embeddings singleton: src/lib/transformers.ts
+- Supabase client: src/lib/supabaseClient.ts
+
+## Notes
+
+- App is dark-first with a light mode toggle.
+- Embeddings are generated locally (no paid API usage).
+- Keep IMPLEMENTATION_PLAN.md updated after each feature commit.
