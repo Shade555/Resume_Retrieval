@@ -63,7 +63,7 @@ Before starting development, review:
 
 ---
 
-## 🎯 Phase 2: Frontend UI Components (IN PROGRESS)
+## ✅ Phase 2: Frontend UI Components (COMPLETE ✓)
 
 **Commit Convention**: See [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) for message format and when to commit.
 **Design Reference**: Use [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for all component colors, gradients, and styling.
@@ -147,34 +147,23 @@ Before starting development, review:
 
 ### Required
 - [ ] `src/app/api/search/route.ts` - Search query processing
-  - Accept search query string
-  - Generate embedding for query
-  - Call Supabase RPC `match_resumes()`
-  - Return ranked results with scores
-  - Pagination support
 
-- [ ] `src/app/api/resumes/route.ts` - Resume management
-  - GET: List all resumes with pagination
-  - DELETE: Remove resume by ID
-  - Filter by date range
+## 🔌 Phase 3: API Routes & Backend Logic (COMPLETE ✓)
 
-- [ ] `src/app/api/resumes/[id]/route.ts` - Resume details
-  - GET: Fetch single resume with full text
-  - UPDATE: Modify candidate metadata
-  - DELETE: Remove resume
+### Task 8: Resume Management Endpoints ✅
+- [x] Create `src/app/api/resumes/route.ts` (GET all with pagination)
+- [x] Create `src/app/api/resumes/[id]/route.ts` (GET single, DELETE)
+- [x] Implement proper error handling for missing/deleted records
+- [ ] Commit: `feat(api): add resume CRUD endpoints`
 
-- [ ] `src/app/api/skills/route.ts` - Skills extraction & aggregation
-  - Analyze all resumes for skill frequency
-  - Return top skills for filter suggestions
-
-- [ ] `src/app/api/batch/upload/route.ts` - Batch resume upload
-  - Accept multiple PDFs
-  - Parallel embedding generation
-  - Transaction rollback on failure
+### Task 9: Analytics & Filters API ✅
+- [x] Create `src/app/api/skills/route.ts` (GET unique skills frequency)
+- [x] Create `src/app/api/batch/upload/route.ts` (POST multiple resumes)
+- [ ] Commit: `feat(api): add skills aggregation and batch upload endpoints`
 
 ---
 
-## 📦 Phase 4: PDF Processing (TO BUILD)
+## ✅ Phase 4: PDF Processing (COMPLETE ✓)
 
 ### Library: `pdfjs-dist` or `pdf-parse`
 

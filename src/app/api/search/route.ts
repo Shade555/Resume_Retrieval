@@ -8,7 +8,8 @@ export const runtime = "nodejs";
 type SearchRequestBody = {
   query?: string;
   threshold?: number;
-  count?: number;
+  page?: number;
+  limit?: number;
 };
 
 type SearchResultRow = {
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as SearchRequestBody;
     const query = body.query?.trim() || "";
     const threshold = typeof body.threshold === "number" ? body.threshold : 0.35;
-    const count = typeof body.count === "number" ? body.count : 12;
+    const page = typeof body.page === "number" ? body.page : 1;
+    const limit = typeof body.limit === "number" ? body.limit : 12;
 
     if (!query) {
       return NextResponse.json(
@@ -41,19 +43,29 @@ export async function POST(request: Request) {
       );
     }
 
-    if (count < 1 || count > 50) {
+    if (page < 1) {
       return NextResponse.json(
-        { error: "Count must be between 1 and 50." },
+        { error: "Page must be at least 1." },
+        { status: 400 },
+      );
+    }
+
+    if (limit < 1 || limit > 100) {
+      return NextResponse.json(
+        { error: "Limit must be between 1 and 100." },
         { status: 400 },
       );
     }
 
     const queryEmbedding = await generateEmbedding(query);
 
+    const matchCount = page * limit;
+    
+    // We request up to matchCount + 1 to check if there is a next page.
     const { data, error } = await supabase.rpc("match_resumes", {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
-      match_count: count,
+      match_count: matchCount + 1,
     });
 
     if (error) {
@@ -63,7 +75,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const results = ((data || []) as SearchResultRow[]).map((row) => ({
+    const results = ((data || []) as SearchResultRow[]);
+    const hasNextPage = results.length > matchCount;
+    
+    if (hasNextPage) {
+      results.pop(); // Remove the extra item
+    }
+
+    const startIndex = (page - 1) * limit;
+    const pagedResults = results.slice(startIndex).map((row) => ({
       id: row.id,
       candidate_name: row.candidate_name,
       email: row.email,
@@ -76,8 +96,10 @@ export async function POST(request: Request) {
       {
         query,
         threshold,
-        count,
-        results,
+        page,
+        limit,
+        results: pagedResults,
+        hasNextPage,
       },
       { status: 200 },
     );

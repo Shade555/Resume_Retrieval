@@ -97,15 +97,24 @@ Expected:
 
 ## Current API Endpoints
 
-- POST /api/parse
-	- Accepts text, rawText, or raw_text
-	- Generates a 384-dimensional embedding
-	- Stores raw_text and embedding in Supabase
-- POST /api/search
-	- Accepts query, threshold, count
-	- Generates query embedding locally
-	- Calls match_resumes RPC in Supabase
-	- Returns ranked candidate matches
+- `POST /api/parse`
+  - Accepts text or PDF via FormData
+  - Generates a 384-dimensional embedding and stores in Supabase
+- `POST /api/search`
+  - Accepts query, threshold, limit, and pagination params
+  - Generates query embedding locally and calls match_resumes RPC
+- `GET /api/resumes`
+  - Lists all uploaded resumes with pagination and date filtering
+- `GET /api/resumes/[id]`
+  - Retrieves full details for a specific resume
+- `PATCH /api/resumes/[id]`
+  - Updates candidate metadata (name, email, skills)
+- `DELETE /api/resumes` & `DELETE /api/resumes/[id]`
+  - Deletes a resume and its embedding
+- `GET /api/skills`
+  - Analyzes the database and aggregates unique skill frequencies
+- `POST /api/batch/upload`
+  - Uploads multiple PDF resumes in parallel with strict transaction rollbacks
 
 ## Project Structure (Current)
 
