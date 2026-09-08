@@ -174,12 +174,10 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     set({ _abortController: abortController, isSearching: true });
 
     try {
-      const response = await fetch(`/api/search?_t=${Date.now()}`, {
+      const response = await fetch(`/api/search`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache"
         },
         cache: "no-store",
         body: JSON.stringify({

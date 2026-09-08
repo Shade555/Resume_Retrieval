@@ -39,6 +39,16 @@ Try these natural language queries to see the semantic AI in action:
 
 ---
 
+## 🐛 Architectural Bug Fixes
+
+Recent updates have stabilized extreme edge-cases in the search architecture:
+- **Hybrid Keyword Boosting**: Pure semantic search models (like `all-MiniLM-L6-v2`) often fail at recognizing highly specific technical jargon (e.g., "ChemCAD"). A JS-side Keyword Booster was injected over the semantic results to detect exact keyword matches and apply a +25% similarity bump, ensuring niche resumes aren't buried.
+- **Race Condition Resolution**: Typing rapidly triggered concurrent React state fetching that caused older requests to overwrite newer ones on the screen. Solved by injecting a native browser `AbortController` into the Zustand store.
+- **WASM Concurrency Locks**: Hitting the `transformers.js` ONNX pipeline with simultaneous queries corrupted the engine's WebAssembly memory, causing it to endlessly spit out identical embeddings (the "stuck on the last prompt" bug). Solved by building an asynchronous Mutex Lock around the embedding generator to guarantee thread-safe processing.
+- **Aggressive Cache Busters**: Bypassed Next.js 14 Client Router and browser caching that was incorrectly serving stale POST requests by injecting hard cache headers and query string timestamps.
+
+---
+
 ## 🛠️ The Tech Stack
 
 - **Framework:** Next.js 16 (App Router, TypeScript)

@@ -7,9 +7,6 @@ import { redis } from "@/src/lib/redis";
 import { logger } from "@/src/lib/logger";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 type SearchRequestBody = {
   query?: string;
