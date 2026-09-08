@@ -114,6 +114,30 @@ export async function POST(request: Request) {
 
     let results = ((data || []) as SearchResultRow[]);
     
+    // Hybrid Search: Keyword Boosting
+    // Sometimes semantic models struggle with highly specific technical terms (like "chemcad").
+    // We boost the similarity score if the exact query words appear in the resume.
+    const queryWords = query.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 2);
+    results = results.map(r => {
+      let boost = 0;
+      if (r.raw_text) {
+        const text = r.raw_text.toLowerCase();
+        queryWords.forEach(w => {
+          // If the exact keyword exists in the resume, give it a massive 25% boost
+          if (text.includes(w)) {
+            boost += 0.25;
+          }
+        });
+      }
+      return { ...r, similarity: Math.min(1, r.similarity + boost) };
+    });
+
+    // Re-sort results after keyword boosting
+    results.sort((a, b) => b.similarity - a.similarity);
+
+    // Safety Fallback: Forcefully filter by threshold in case the Supabase RPC has a bug
+    results = results.filter(r => r.similarity >= threshold);
+
     // Apply additional skills filtering in JavaScript
     if (selectedSkills.length > 0) {
       results = results.filter((resume) => {

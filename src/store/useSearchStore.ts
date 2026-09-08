@@ -44,6 +44,7 @@ interface SearchState {
   toggleFlag: (id: string) => void;
   runSearch: (queryOverride?: string, pageOverride?: number, limitOverride?: number) => Promise<void>;
   initializeTheme: () => void;
+  _abortController: AbortController | null;
 }
 
 export const useSearchStore = create<SearchState>((set, get) => ({
@@ -56,7 +57,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   limit: 12,
   hasNextPage: false,
 
-  relevanceThreshold: 0.0,
+  relevanceThreshold: 0.35,
   selectedSkills: [],
   selectedResumeIds: new Set(),
   flaggedResumeIds: new Set(
@@ -150,6 +151,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     return { flaggedResumeIds: newSet };
   }),
 
+  // AbortController reference for canceling stale requests
+  _abortController: null as AbortController | null,
+
   runSearch: async (queryOverride?: string, pageOverride?: number, limitOverride?: number) => {
     const state = get();
     const activeQuery = (queryOverride ?? state.query).trim();
@@ -161,9 +165,15 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       return;
     }
 
-    try {
-      set({ isSearching: true });
+    // Cancel any ongoing search request
+    if (state._abortController) {
+      state._abortController.abort();
+    }
 
+    const abortController = new AbortController();
+    set({ _abortController: abortController, isSearching: true });
+
+    try {
       const response = await fetch("/api/search", {
         method: "POST",
         headers: {
@@ -174,8 +184,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
           threshold: state.relevanceThreshold,
           page: activePage,
           limit: activeLimit,
-          skills: state.selectedSkills, // Pass skills to backend for future usage
+          skills: state.selectedSkills,
         }),
+        signal: abortController.signal,
       });
 
       const data = (await response.json()) as SearchResponse;
@@ -183,6 +194,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       if (!response.ok) {
         throw new Error(data.error || "Search request failed.");
       }
+
+      // If this request was aborted, ignore the results
+      if (abortController.signal.aborted) return;
 
       set((state) => {
         const newResults = data.results || [];
@@ -196,7 +210,6 @@ export const useSearchStore = create<SearchState>((set, get) => ({
           };
         }
 
-        // Deduplicate appending results
         const existingIds = new Set(state.results.map(r => r.id));
         const filteredNewResults = newResults.filter(r => !existingIds.has(r.id));
 
@@ -207,11 +220,18 @@ export const useSearchStore = create<SearchState>((set, get) => ({
           limit: activeLimit,
         };
       });
-    } catch (searchError) {
+    } catch (searchError: any) {
+      if (searchError.name === 'AbortError') {
+        // Ignore abort errors
+        return;
+      }
       toast.error(searchError instanceof Error ? searchError.message : "Unknown search error.");
       set({ results: [], hasNextPage: false });
     } finally {
-      set({ isSearching: false });
+      // Only reset isSearching if this is still the active request
+      if (!abortController.signal.aborted) {
+        set({ isSearching: false });
+      }
     }
   },
 }));
